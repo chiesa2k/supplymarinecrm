@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Supply Marine HVAC Management System
 ## FPSO Bacalhau - Modec
 
@@ -293,3 +294,6 @@ Este projeto é propriedade da Supply Marine e Modec.
 **Desenvolvido com ❤️ para Supply Marine**
 
 *Sistema de Gestão HVAC - FPSO Bacalhau*
+=======
+# supplymarinecrm
+>>>>>>> aa637ee23e4c13de51752ab2abd15f4bb152d3d3

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Supply Marine HVAC Management System
 ## FPSO Bacalhau - Modec
 

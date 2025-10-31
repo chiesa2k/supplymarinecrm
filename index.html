@@ -1,0 +1,1757 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supply Marine HVAC - FPSO Bacalhau</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-dark: #003366;
+            --primary-dark-alt: #1a5490;
+            --secondary-ocean: #0066CC;
+            --secondary-light: #3399FF;
+            --accent-light: #66B2FF;
+            --accent-lighter: #B2D9FF;
+            --dark-bg: #002244;
+            --light-bg: #F5F8FB;
+            --success: #00AA44;
+            --warning: #FF9900;
+            --alert: #FF6600;
+            --error: #CC0000;
+            --text-white: #FFFFFF;
+            --text-dark: #003366;
+            --border-light: #E0E0E0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* HEADER */
+        header {
+            background: var(--text-white);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-container {
+            text-align: center;
+            padding: 15px 0;
+            background: linear-gradient(to bottom, var(--primary-dark), var(--primary-dark-alt));
+        }
+
+        .logo-container img {
+            height: 70px;
+            width: auto;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            transition: transform 0.3s ease;
+        }
+
+        .logo-container img:hover {
+            transform: scale(1.05);
+        }
+
+        .header-title {
+            text-align: center;
+            padding: 15px 0;
+            color: var(--text-dark);
+            font-size: 1.5em;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border-light);
+        }
+
+        /* NAVIGATION */
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            background: var(--text-white);
+            border-bottom: 2px solid var(--border-light);
+            padding: 0;
+        }
+
+        .nav-tab {
+            color: var(--text-dark);
+            background: transparent;
+            padding: 12px 24px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95em;
+            font-weight: 500;
+        }
+
+        .nav-tab:hover {
+            background: var(--accent-lighter);
+        }
+
+        .nav-tab.active {
+            background: var(--primary-dark);
+            color: var(--text-white);
+            border-bottom: 3px solid var(--secondary-ocean);
+        }
+
+        /* MAIN CONTENT */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            min-height: calc(100vh - 300px);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* DASHBOARD */
+        .kpi-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: var(--primary-dark);
+            color: var(--text-white);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .kpi-card h3 {
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .kpi-card .value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        /* CHARTS */
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-box {
+            background: var(--text-white);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .chart-box h3 {
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* FORMS */
+        .form-section {
+            background: var(--text-white);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--secondary-ocean);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        /* BUTTONS */
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--secondary-ocean);
+            color: var(--text-white);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--accent-lighter);
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-light);
+        }
+
+        .btn-danger {
+            background: var(--error);
+            color: var(--text-white);
+        }
+
+        .btn-danger:hover {
+            background: #990000;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: var(--text-white);
+        }
+
+        .btn-success:hover {
+            background: #008833;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        /* TABLES */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--text-white);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        thead {
+            background: var(--primary-dark);
+            color: var(--text-white);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        tbody tr:hover {
+            background: var(--light-bg);
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        /* STATUS BADGES */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #E8F5E9;
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: #FFF3E0;
+            color: var(--warning);
+        }
+
+        .badge-danger {
+            background: #FFEBEE;
+            color: var(--error);
+        }
+
+        .badge-info {
+            background: #E3F2FD;
+            color: var(--secondary-ocean);
+        }
+
+        /* MODALS */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--text-white);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: var(--text-dark);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: var(--text-dark);
+        }
+
+        /* EXPANDABLE ROWS */
+        .expandable-row {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .expandable-row:hover {
+            background: var(--light-bg) !important;
+        }
+
+        .expanded-content {
+            display: none;
+            padding: 20px;
+            background: var(--light-bg);
+            grid-column: 1 / -1;
+        }
+
+        .expanded-content.active {
+            display: block;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .detail-item {
+            background: var(--text-white);
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 3px solid var(--secondary-ocean);
+        }
+
+        .detail-label {
+            font-size: 0.85em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            font-size: 1.1em;
+            color: var(--text-dark);
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        /* COLLAPSIBLE SECTIONS */
+        .collapsible-header {
+            background: var(--primary-dark);
+            color: var(--text-white);
+            padding: 15px 20px;
+            cursor: pointer;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .collapsible-header:hover {
+            background: var(--primary-dark-alt);
+        }
+
+        .collapsible-header.active {
+            background: var(--secondary-ocean);
+        }
+
+        .collapsible-content {
+            display: none;
+            background: var(--text-white);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .collapsible-content.active {
+            display: block;
+        }
+
+        /* FILTERS */
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+            background: var(--text-white);
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        /* PAGINATION */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            min-width: 40px;
+            height: 40px;
+        }
+
+        .pagination button.active {
+            background: var(--primary-dark);
+            color: var(--text-white);
+        }
+
+        /* NOTIFICATIONS */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--text-white);
+            border-left: 4px solid var(--success);
+            padding: 15px 20px;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.error {
+            border-left-color: var(--error);
+        }
+
+        .toast.warning {
+            border-left-color: var(--warning);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* FOOTER */
+        footer {
+            background: var(--text-white);
+            color: var(--text-dark);
+            padding: 25px;
+            text-align: center;
+            border-top: 1px solid var(--border-light);
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+            margin-top: 40px;
+        }
+
+        footer p {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            nav {
+                flex-wrap: wrap;
+            }
+
+            .nav-tab {
+                padding: 10px 16px;
+                font-size: 0.85em;
+            }
+
+            main {
+                padding: 15px 10px;
+            }
+
+            .kpi-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                max-width: 90vw;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+
+            th, td {
+                padding: 8px 10px;
+            }
+        }
+
+        /* UTILITY */
+        .hidden {
+            display: none;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-20 {
+            margin-top: 20px;
+        }
+
+        .mb-20 {
+            margin-bottom: 20px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header>
+        <div class="logo-container">
+            <img src="https://i.imgur.com/93MNOVp.png" alt="Supply Marine Logo">
+        </div>
+        <div class="header-title">
+            HVAC Management System - FPSO Bacalhau
+        </div>
+        <nav>
+            <button class="nav-tab active" data-tab="dashboard">Dashboard</button>
+            <button class="nav-tab" data-tab="rdo">RDO</button>
+            <button class="nav-tab" data-tab="equipamentos">Equipamentos</button>
+            <button class="nav-tab" data-tab="colaboradores">Colaboradores</button>
+            <button class="nav-tab" data-tab="servicos">Serviços</button>
+            <button class="nav-tab" data-tab="configuracoes">Configurações</button>
+        </nav>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main>
+        <!-- DASHBOARD TAB -->
+        <div id="dashboard" class="tab-content active">
+            <h2>Dashboard - FPSO Bacalhau</h2>
+
+            <div class="kpi-cards">
+                <div class="kpi-card">
+                    <h3>Total de Equipamentos</h3>
+                    <div class="value" id="kpi-equipamentos">35</div>
+                </div>
+                <div class="kpi-card">
+                    <h3>RDOs Este Mês</h3>
+                    <div class="value" id="kpi-rdos">0</div>
+                </div>
+                <div class="kpi-card">
+                    <h3>Horas Trabalhadas</h3>
+                    <div class="value" id="kpi-horas">0h</div>
+                </div>
+                <div class="kpi-card">
+                    <h3>Custo Total</h3>
+                    <div class="value" id="kpi-custo">R$ 0</div>
+                </div>
+            </div>
+
+            <div class="charts-container">
+                <div class="chart-box">
+                    <h3>Status de Equipamentos</h3>
+                    <canvas id="chartStatus"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h3>RDOs por Status</h3>
+                    <canvas id="chartRDO"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- RDO TAB -->
+        <div id="rdo" class="tab-content">
+            <h2>Gerenciamento de RDO</h2>
+
+            <div class="collapsible-header" id="formToggle">
+                ➕ Criar Nova RDO
+                <span>▼</span>
+            </div>
+
+            <div class="collapsible-content" id="formRDOContainer">
+                <form id="formRDO">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Cliente:</label>
+                            <select name="cliente" required>
+                                <option value="Modec">Modec</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Unidade:</label>
+                            <select name="unidade" required>
+                                <option value="FPSO Bacalhau">FPSO Bacalhau</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Equipamento (TAG):</label>
+                            <select name="equipamento" id="selectEquipamento" required>
+                                <option value="">Selecione um equipamento</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tipo de Atividade:</label>
+                            <input type="text" name="tipoAtividade" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Serviço:</label>
+                            <select name="servico" required>
+                                <option value="">Selecione um serviço</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Colaborador:</label>
+                            <select name="colaborador" required>
+                                <option value="">Selecione um colaborador</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Status:</label>
+                            <select name="status" required>
+                                <option value="Programado">Programado</option>
+                                <option value="Em Execução">Em Execução</option>
+                                <option value="Concluído">Concluído</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Horas Trabalhadas:</label>
+                            <input type="number" name="horas" step="0.5" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Custo Total (R$):</label>
+                            <input type="number" name="custo" step="0.01" min="0" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Observações:</label>
+                        <textarea name="observacoes"></textarea>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="submit" class="btn-primary">Criar RDO</button>
+                        <button type="reset" class="btn-secondary">Limpar</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="filters">
+                <select id="filterStatus">
+                    <option value="">Todos os Status</option>
+                    <option value="Programado">Programado</option>
+                    <option value="Em Execução">Em Execução</option>
+                    <option value="Concluído">Concluído</option>
+                </select>
+                <select id="filterColaborador">
+                    <option value="">Todos os Colaboradores</option>
+                </select>
+                <button class="btn-primary" id="btnExportar">📊 Exportar CSV</button>
+            </div>
+
+            <table id="tableRDO">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Data Abertura</th>
+                        <th>Equipamento</th>
+                        <th>Serviço</th>
+                        <th>Colaborador</th>
+                        <th>Status</th>
+                        <th>Horas</th>
+                        <th>Custo</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- EQUIPAMENTOS TAB -->
+        <div id="equipamentos" class="tab-content">
+            <h2>Equipamentos HVAC - FPSO Bacalhau</h2>
+
+            <div class="filters">
+                <select id="filterLocal">
+                    <option value="">Todos os Locais</option>
+                </select>
+                <select id="filterTipo">
+                    <option value="">Todos os Tipos</option>
+                </select>
+            </div>
+
+            <table id="tableEquipamentos">
+                <thead>
+                    <tr>
+                        <th>TAG</th>
+                        <th>Tipo</th>
+                        <th>Fabricante</th>
+                        <th>Local</th>
+                        <th>Capacidade (kW)</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- COLABORADORES TAB -->
+        <div id="colaboradores" class="tab-content">
+            <h2>Gestão de Colaboradores</h2>
+
+            <div class="collapsible-header" id="formColabToggle">
+                ➕ Adicionar Colaborador
+                <span>▼</span>
+            </div>
+
+            <div class="collapsible-content" id="formColabContainer">
+                <form id="formColab">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nome:</label>
+                            <input type="text" name="nome" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Cargo:</label>
+                            <input type="text" name="cargo" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Email:</label>
+                            <input type="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Telefone:</label>
+                            <input type="tel" name="telefone" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Especialidade:</label>
+                            <input type="text" name="especialidade">
+                        </div>
+                        <div class="form-group">
+                            <label>Status:</label>
+                            <select name="status">
+                                <option value="Ativo">Ativo</option>
+                                <option value="Inativo">Inativo</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="submit" class="btn-primary">Adicionar</button>
+                        <button type="reset" class="btn-secondary">Limpar</button>
+                    </div>
+                </form>
+            </div>
+
+            <table id="tableColaboradores">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Cargo</th>
+                        <th>Email</th>
+                        <th>Telefone</th>
+                        <th>RDOs</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- SERVIÇOS TAB -->
+        <div id="servicos" class="tab-content">
+            <h2>Catálogo de Serviços</h2>
+
+            <div id="servicesGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;"></div>
+        </div>
+
+        <!-- CONFIGURAÇÕES TAB -->
+        <div id="configuracoes" class="tab-content">
+            <h2>Configurações do Sistema</h2>
+
+            <div class="form-section">
+                <h3>Logo Supply Marine</h3>
+                <img src="https://i.imgur.com/93MNOVp.png" alt="Supply Marine Logo" style="max-width: 200px; height: auto;">
+            </div>
+
+            <div class="form-section">
+                <h3>Paleta de Cores</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                    <div style="background: #003366; color: white; padding: 20px; border-radius: 4px; text-align: center;">
+                        <strong>#003366</strong><br>Primária Escura
+                    </div>
+                    <div style="background: #1a5490; color: white; padding: 20px; border-radius: 4px; text-align: center;">
+                        <strong>#1a5490</strong><br>Primária Média
+                    </div>
+                    <div style="background: #0066CC; color: white; padding: 20px; border-radius: 4px; text-align: center;">
+                        <strong>#0066CC</strong><br>Secundária
+                    </div>
+                    <div style="background: #3399FF; color: white; padding: 20px; border-radius: 4px; text-align: center;">
+                        <strong>#3399FF</strong><br>Secundária Claro
+                    </div>
+                    <div style="background: #00AA44; color: white; padding: 20px; border-radius: 4px; text-align: center;">
+                        <strong>#00AA44</strong><br>Sucesso
+                    </div>
+                    <div style="background: #FF9900; color: white; padding: 20px; border-radius: 4px; text-align: center;">
+                        <strong>#FF9900</strong><br>Aviso
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Informações do Sistema</h3>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <div class="detail-label">Versão</div>
+                        <div class="detail-value">1.0</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Cliente</div>
+                        <div class="detail-value">Modec</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Unidade</div>
+                        <div class="detail-value">FPSO Bacalhau</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Fornecedor</div>
+                        <div class="detail-value">Supply Marine</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Estatísticas do Sistema</h3>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <div class="detail-label">Total de Equipamentos</div>
+                        <div class="detail-value" id="stat-equip">35</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Total de Colaboradores</div>
+                        <div class="detail-value" id="stat-colab">6</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Total de Serviços</div>
+                        <div class="detail-value" id="stat-serv">8</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Total de RDOs</div>
+                        <div class="detail-value" id="stat-rdos">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODALS -->
+    <div id="modalRDO" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalRDOTitle">Detalhes da RDO</h2>
+                <button class="close-btn">✕</button>
+            </div>
+            <div id="modalRDOBody"></div>
+        </div>
+    </div>
+
+    <div id="modalEquip" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Detalhes do Equipamento</h2>
+                <button class="close-btn">✕</button>
+            </div>
+            <div id="modalEquipBody"></div>
+        </div>
+    </div>
+
+    <div id="modalServico" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Detalhes do Serviço</h2>
+                <button class="close-btn">✕</button>
+            </div>
+            <div id="modalServicoBody"></div>
+        </div>
+    </div>
+
+    <div id="modalConfirm" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>Confirmação</h2>
+                <button class="close-btn">✕</button>
+            </div>
+            <p id="confirmMessage"></p>
+            <div class="btn-group">
+                <button class="btn-danger" id="confirmYes">Sim, Deletar</button>
+                <button class="btn-secondary" id="confirmNo">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>&copy; 2025 Supply Marine - HVAC Solutions Naval & Offshore</p>
+        <p>FPSO Bacalhau | Modec Serviços de Petróleo do Brasil</p>
+    </footer>
+
+    <script>
+        // ===== DADOS =====
+        const app = {
+            // Equipamentos REAIS
+            equipamentos: [
+                {tag: "77GB001A", tipo: "Unidade Condensadora", fabricante: "Glory Bright", modelo: "CB.CS.3521140/2P.D.K.A-NR13", tr: 176.296, kw: 620.0, btu: 2115526, tipoAtiv: "Acomodações", local: "MR1", compressor: "Bitzer/CSH7563-80Y", condensador: "Agua", refrigerante: "R407C"},
+                {tag: "77GB001B", tipo: "Unidade Condensadora", fabricante: "Glory Bright", modelo: "CB.CS.3521140/2P.D.K.A-NR13", tr: 176.296, kw: 620.0, btu: 2115526, tipoAtiv: "Acomodações", local: "MR1", compressor: "Bitzer/CSH7563-8OY", condensador: "Agua", refrigerante: "R407C"},
+                {tag: "77GB001C", tipo: "Unidade Condensadora", fabricante: "Glory Bright", modelo: "CB.CS.3521140/2P.D.K.A-NR13", tr: 176.296, kw: 620.0, btu: 2115526, tipoAtiv: "Acomodações", local: "MR1", compressor: "Bitzer/CSH7563-80Y", condensador: "Agua", refrigerante: "R407C"},
+                {tag: "77GA001A", tipo: "Unidade Evaporadora", fabricante: "Glory Bright", modelo: "AAHM47.3N-6S", tr: 176.296, kw: 620.0, btu: 2115526, tipoAtiv: "Acomodações", local: "MR1", compressor: "N/A (Evap)", condensador: "Ar", refrigerante: "R407C"},
+                {tag: "77GA001B", tipo: "Unidade Evaporadora", fabricante: "Glory Bright", modelo: "AAHM47.3N-6S", tr: 176.296, kw: 620.0, btu: 2115526, tipoAtiv: "Acomodações", local: "MR1", compressor: "N/A (Evap)", condensador: "Ar", refrigerante: "R407C"},
+                {tag: "77GB500A", tipo: "Rooftop", fabricante: "Cadar Marine", modelo: "CJKR(F)-500", tr: 187.09, kw: 658.0, btu: 2245187, tipoAtiv: "E-House (Alpha)", local: "Área Externa", compressor: "Bitzer/CSH7573-90Y-40P", condensador: "Ar", refrigerante: "R407C"},
+                {tag: "77GB500B", tipo: "Rooftop", fabricante: "Cadar Marine", modelo: "CIKR(F)-500", tr: 187.09, kw: 658.0, btu: 2245187, tipoAtiv: "E-House (Bravo)", local: "Área Externa", compressor: "Bitzer/CSH7573-90Y-40P", condensador: "Ar", refrigerante: "R407C"},
+                {tag: "77GJ500A", tipo: "Rooftop", fabricante: "Friend Thermal", modelo: "4850OLNQ-16", tr: 137.06, kw: 482.0, btu: 1644658, tipoAtiv: "VFD (Alpha)", local: "N/I", compressor: "Bitzer/CSH7573-90Y-40P", condensador: "Ar", refrigerante: "R407C"},
+                {tag: "77GJ500B", tipo: "Rooftop", fabricante: "Friend Thermal", modelo: "48500LNQ-1~6", tr: 137.06, kw: 482.0, btu: 1644658, tipoAtiv: "VFD (Bravo)", local: "N/I", compressor: "Bitzer/CSH7573-909-40P", condensador: "Ar", refrigerante: "R407C"},
+                {tag: "77GB400A", tipo: "Self Contained", fabricante: "Glory Bright", modelo: "GAL 81", tr: 30.56, kw: 107.5, btu: 366799, tipoAtiv: "Laboratório (Alpha)", local: "Laboratório", compressor: "Copeland/ZR310KCE-TWD-522", condensador: "Ar", refrigerante: "R407C"},
+                {tag: "77GB400B", tipo: "Self Contained", fabricante: "Glory Bright", modelo: "GAL 81", tr: 30.56, kw: 107.5, btu: 366799, tipoAtiv: "Laboratório (Bravo)", local: "Laboratório", compressor: "Copeland/ZR310KCE-TWD-522", condensador: "Ar", refrigerante: "R407C"},
+                {tag: "77GB402", tipo: "Self Contained", fabricante: "Glory Bright", modelo: "GAL66", tr: 24.62, kw: 86.6, btu: 295745, tipoAtiv: "Oficina", local: "Oficina", compressor: "Copeland/ZR310KCE-TWD-522", condensador: "Ar", refrigerante: "R407C"},
+                {tag: "77GB005A", tipo: "Self Contained", fabricante: "Glory Bright", modelo: "GAL76", tr: 29.71, kw: 104.5, btu: 356564, tipoAtiv: "Telecom & UPS (Alpha)", local: "Telecom & UPS", compressor: "Copeland/ZR310KCE-TWD", condensador: "Ar", refrigerante: "R40C"},
+                {tag: "77GB005B", tipo: "Self Contained", fabricante: "Glory Bright", modelo: "GAL76", tr: 29.71, kw: 104.5, btu: 356564, tipoAtiv: "Telecom & UPS (Bravo)", local: "Telecom & UPS", compressor: "Copeland/ZR310KCE-TWD", condensador: "Ar", refrigerante: "R40C"},
+                {tag: "77GB010A", tipo: "Self Contained", fabricante: "Glory Bright", modelo: "GAL69", tr: 25.14, kw: 88.4, btu: 301725, tipoAtiv: "CER & UPS (Alpha)", local: "CER & UPS", compressor: "Copeland/ZR250KCE-TWD", condensador: "Ar", refrigerante: "R407C"},
+                {tag: "77GB010B", tipo: "Self Contained", fabricante: "Glory Bright", modelo: "GAL69", tr: 25.14, kw: 88.4, btu: 301725, tipoAtiv: "CER & UPS (Bravo)", local: "CER & UPS", compressor: "Copeland/ZR250KCE-TWD", condensador: "Ar", refrigerante: "R407C"},
+                {tag: "77GB012", tipo: "Self Contained", fabricante: "Glory Bright", modelo: "GAL72", tr: 20.47, kw: 72.0, btu: 245674, tipoAtiv: "Switchboard RM", local: "Switchboard RM", compressor: "Copeland/ZR250KCE-TWD", condensador: "Ar", refrigerante: "R407C"},
+                {tag: "77GB018", tipo: "Self Contained", fabricante: "Glory Bright", modelo: "GWL35", tr: 12.71, kw: 44.7, btu: 152626, tipoAtiv: "Engine Room", local: "Engine Room", compressor: "Copeland/ZR125KCE-TFD", condensador: "Agua Doce", refrigerante: "R407C"},
+                {tag: "77GB009A", tipo: "Self Contained", fabricante: "Glory Bright", modelo: "GWL53", tr: 15.07, kw: 53.0, btu: 180842, tipoAtiv: "Cozinha (Alpha)", local: "Cozinha", compressor: "Copeland/ZR94KCE-TFD", condensador: "Agua Doce", refrigerante: "R407C"},
+                {tag: "77GB009B", tipo: "Self Contained", fabricante: "Glory Bright", modelo: "GWL53", tr: 15.07, kw: 53.0, btu: 180842, tipoAtiv: "Cozinha (Bravo)", local: "Cozinha", compressor: "Copeland/ZR94KCE-TFD", condensador: "Agua Doce", refrigerante: "R407C"},
+                {tag: "77GB003A", tipo: "Self Contained", fabricante: "Glory Bright", modelo: "GAL30", tr: 8.53, kw: 30.0, btu: 102364, tipoAtiv: "CCR (Alpha)", local: "CCR", compressor: "Copeland/ZR108KCE-TFD", condensador: "Ar", refrigerante: "R407C"},
+                {tag: "77GB003B", tipo: "Self Contained", fabricante: "Glory Bright", modelo: "GAL30", tr: 8.53, kw: 30.0, btu: 102364, tipoAtiv: "CCR (Bravo)", local: "CCR", compressor: "Copeland/ZR108KCE-TFD", condensador: "Ar", refrigerante: "R407C"},
+                {tag: "77GB007", tipo: "Self Contained", fabricante: "Glory Bright", modelo: "GAL32", tr: 9.10, kw: 32.0, btu: 109198, tipoAtiv: "Sala de Reunião", local: "Sala de Reunião", compressor: "Copeland/ZR125KCE-TFD", condensador: "Ar", refrigerante: "R407C"},
+                {tag: "77GB014", tipo: "Self Contained", fabricante: "Glory Bright", modelo: "GAL12", tr: 3.41, kw: 12.0, btu: 40945, tipoAtiv: "FWD", local: "FWD", compressor: "Copeland/ZB26KCE-TFD", condensador: "Ar", refrigerante: "R407C"},
+                {tag: "77GB002A", tipo: "Self Contained", fabricante: "Glory Bright", modelo: "GAL9", tr: 2.56, kw: 9.0, btu: 30709, tipoAtiv: "Sala de Rádio (Alpha)", local: "Sala de Rádio", compressor: "Copeland/ZB21KCE-TFD", condensador: "Ar", refrigerante: "R407C"},
+                {tag: "77GB002B", tipo: "Self Contained", fabricante: "Glory Bright", modelo: "GAL9", tr: 2.56, kw: 9.0, btu: 30709, tipoAtiv: "Sala de Rádio (Bravo)", local: "Sala de Rádio", compressor: "Copeland/ZB21KCE-TFD", condensador: "Ar", refrigerante: "R407C"},
+                {tag: "97GB701A", tipo: "Unidade Condensadora", fabricante: "Rapid Marine", modelo: "N/I", tr: 5.12, kw: 18.0, btu: 61418, tipoAtiv: "Provisões", local: "Praça de Máquinas", compressor: "Bitzer/4HE-18Y-40P", condensador: "Agua Doce", refrigerante: "R404A"},
+                {tag: "97GB701B", tipo: "Unidade Condensadora", fabricante: "Rapid Marine", modelo: "N/I", tr: 5.12, kw: 18.0, btu: 61418, tipoAtiv: "Provisões", local: "Praça de Máquinas", compressor: "Bitzer/4HE-18Y-40P", condensador: "Agua Doce", refrigerante: "R404A"},
+                {tag: "97GB703", tipo: "Forçador de Ar", fabricante: "Walter Roller", modelo: "FAVT 614", tr: 5.12, kw: 18.0, btu: 61418, tipoAtiv: "Provisões (Carnes)", local: "Cozinha", compressor: "N/A (Evap)", condensador: "N/A", refrigerante: "R404A"},
+                {tag: "97GB704", tipo: "Forçador de Ar", fabricante: "Walter Roller", modelo: "FAVT 613", tr: 5.12, kw: 18.0, btu: 61418, tipoAtiv: "Provisões (Peixes)", local: "Cozinha", compressor: "N/A (Evap)", condensador: "N/A", refrigerante: "R404A"},
+                {tag: "97GB706", tipo: "Forçador de Ar", fabricante: "Walter Roller", modelo: "FAVT 611", tr: 5.12, kw: 18.0, btu: 61418, tipoAtiv: "Provisões (Laticínios)", local: "Cozinha", compressor: "N/A (Evap)", condensador: "N/A", refrigerante: "R404A"},
+                {tag: "97GB705", tipo: "Forçador de Ar", fabricante: "Walter Roller", modelo: "FAVT 612", tr: 5.12, kw: 18.0, btu: 61418, tipoAtiv: "Provisões (Verduras)", local: "Cozinha", compressor: "N/A (Evap)", condensador: "N/A", refrigerante: "R404A"},
+                {tag: "77GT701", tipo: "Split System", fabricante: "N/I", modelo: "N/I", tr: null, kw: 10.0, btu: null, tipoAtiv: "Guindaste (Alpha)", local: "N/I", compressor: "N/A", condensador: "N/A", refrigerante: "R407C"},
+                {tag: "77GT702", tipo: "Split System", fabricante: "N/I", modelo: "N/I", tr: null, kw: 10.0, btu: null, tipoAtiv: "Guindaste (Bravo)", local: "N/I", compressor: "N/A", condensador: "N/A", refrigerante: "R407C"},
+                {tag: "77GT703", tipo: "Split System", fabricante: "N/I", modelo: "N/I", tr: null, kw: 10.0, btu: null, tipoAtiv: "Guindaste (Charlie)", local: "N/I", compressor: "N/A", condensador: "N/A", refrigerante: "R407C"}
+            ],
+            servicos: [
+                {id: "SRV001", nome: "Manutenção Preventiva Mensal", desc: "Inspeção visual, medições e verificação de vazamentos mensais", categoria: "Manutenção", periodicidade: "Mensal", custo: 2500},
+                {id: "SRV002", nome: "Limpeza Profunda de Serpentinas", desc: "Limpeza profunda de todas as serpentinas e trocadores", categoria: "Limpeza", periodicidade: "Trimestral", custo: 4200},
+                {id: "SRV003", nome: "Substituição de Óleo Lubrificante", desc: "Substituição periódica de óleo do compressor", categoria: "Manutenção", periodicidade: "Anual", custo: 3500},
+                {id: "SRV004", nome: "Análise de Qualidade do Ar", desc: "Análise química e microbiológica do ar interior", categoria: "Análise", periodicidade: "Semestral", custo: 3800},
+                {id: "SRV005", nome: "Calibração de Pressostatos", desc: "Calibração de pressostatos e válvulas de segurança", categoria: "Calibração", periodicidade: "Anual", custo: 2800},
+                {id: "SRV006", nome: "Revisão ATEX de Equipamentos", desc: "Verificação de conformidade ATEX de equipamentos certificados", categoria: "Conformidade", periodicidade: "Anual", custo: 5500},
+                {id: "SRV007", nome: "Reparo de Vazamento de Refrigerante", desc: "Detecção e reparação de vazamentos de refrigerante", categoria: "Reparo", periodicidade: "Conforme Necessário", custo: 4000},
+                {id: "SRV008", nome: "Higienização de Dutos", desc: "Higienização completa do sistema de dutos", categoria: "Higienização", periodicidade: "Semestral", custo: 6200}
+            ],
+            colaboradores: [
+                {id: "COL001", nome: "Bruno de Oliveira", cargo: "Maintenance Engineer", email: "bruno.oliveira@modec.com", telefone: "+55 21 98765-4321", especialidade: "Gestão de Embarcação", status: "Ativo"},
+                {id: "COL002", nome: "Carlos Fernando Silva", cargo: "Técnico HVAC", email: "carlos.silva@supplymarine.com", telefone: "+55 21 99876-5432", especialidade: "Sistemas Frigoríficos", status: "Ativo"},
+                {id: "COL003", nome: "Marcela Santos", cargo: "Coordenadora de Manutenção", email: "marcela.santos@supplymarine.com", telefone: "+55 21 97654-3210", especialidade: "Coordenação Geral", status: "Ativo"},
+                {id: "COL004", nome: "Roberto Martins", cargo: "Técnico HVAC Senior", email: "roberto.martins@supplymarine.com", telefone: "+55 21 96543-2109", especialidade: "ATEX / Certificação", status: "Ativo"},
+                {id: "COL005", nome: "Juliana Costa", cargo: "Engenheira de Sistemas", email: "juliana.costa@supplymarine.com", telefone: "+55 21 95432-1098", especialidade: "Engenharia de Projeto", status: "Ativo"},
+                {id: "COL006", nome: "Diego Ferreira", cargo: "Assistente de Manutenção", email: "diego.ferreira@supplymarine.com", telefone: "+55 21 94321-0987", especialidade: "Apoio Técnico", status: "Ativo"}
+            ],
+            rdos: [],
+
+            // MÉTODOS
+            init() {
+                this.setupEventListeners();
+                this.renderEquipamentos();
+                this.renderServicos();
+                this.renderColaboradores();
+                this.updateDashboard();
+            },
+
+            setupEventListeners() {
+                // Tabs
+                document.querySelectorAll('.nav-tab').forEach(tab => {
+                    tab.addEventListener('click', (e) => this.switchTab(e.target.dataset.tab));
+                });
+
+                // Collapsible
+                document.getElementById('formToggle')?.addEventListener('click', () => this.toggleCollapsible('formRDOContainer'));
+                document.getElementById('formColabToggle')?.addEventListener('click', () => this.toggleCollapsible('formColabContainer'));
+
+                // Forms
+                document.getElementById('formRDO')?.addEventListener('submit', (e) => this.handleRDOSubmit(e));
+                document.getElementById('formColab')?.addEventListener('submit', (e) => this.handleColabSubmit(e));
+
+                // Filters
+                document.getElementById('filterStatus')?.addEventListener('change', () => this.renderRDOs());
+                document.getElementById('filterColaborador')?.addEventListener('change', () => this.renderRDOs());
+                document.getElementById('filterLocal')?.addEventListener('change', () => this.renderEquipamentos());
+                document.getElementById('filterTipo')?.addEventListener('change', () => this.renderEquipamentos());
+
+                // Export
+                document.getElementById('btnExportar')?.addEventListener('click', () => this.exportCSV());
+
+                // Modals
+                document.querySelectorAll('.close-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.target.closest('.modal').classList.remove('active');
+                    });
+                });
+
+                // Equipamento selector auto-fill
+                document.getElementById('selectEquipamento')?.addEventListener('change', (e) => {
+                    const equip = this.equipamentos.find(x => x.tag === e.target.value);
+                    if (equip) {
+                        document.querySelector('[name="tipoAtividade"]').value = equip.tipoAtiv;
+                    }
+                });
+
+                this.populateSelects();
+            },
+
+            populateSelects() {
+                // Equipamentos
+                const selectEquip = document.getElementById('selectEquipamento');
+                if (selectEquip) {
+                    this.equipamentos.forEach(e => {
+                        const opt = document.createElement('option');
+                        opt.value = e.tag;
+                        opt.textContent = e.tag;
+                        selectEquip.appendChild(opt);
+                    });
+                }
+
+                // Serviços
+                const selectServ = document.querySelector('[name="servico"]');
+                if (selectServ) {
+                    this.servicos.forEach(s => {
+                        const opt = document.createElement('option');
+                        opt.value = s.id;
+                        opt.textContent = s.nome;
+                        selectServ.appendChild(opt);
+                    });
+                }
+
+                // Colaboradores
+                const selectColab = document.querySelector('[name="colaborador"]');
+                if (selectColab) {
+                    this.colaboradores.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = c.nome;
+                        selectColab.appendChild(opt);
+                    });
+                }
+
+                // Filter Colaborador
+                const filterColab = document.getElementById('filterColaborador');
+                if (filterColab) {
+                    this.colaboradores.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = c.nome;
+                        filterColab.appendChild(opt);
+                    });
+                }
+
+                // Filter Local
+                const filterLocal = document.getElementById('filterLocal');
+                if (filterLocal) {
+                    const locais = [...new Set(this.equipamentos.map(e => e.local))];
+                    locais.forEach(l => {
+                        const opt = document.createElement('option');
+                        opt.value = l;
+                        opt.textContent = l;
+                        filterLocal.appendChild(opt);
+                    });
+                }
+
+                // Filter Tipo
+                const filterTipo = document.getElementById('filterTipo');
+                if (filterTipo) {
+                    const tipos = [...new Set(this.equipamentos.map(e => e.tipo))];
+                    tipos.forEach(t => {
+                        const opt = document.createElement('option');
+                        opt.value = t;
+                        opt.textContent = t;
+                        filterTipo.appendChild(opt);
+                    });
+                }
+            },
+
+            switchTab(tabName) {
+                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+
+                document.getElementById(tabName).classList.add('active');
+                event.target.classList.add('active');
+            },
+
+            toggleCollapsible(id) {
+                const el = document.getElementById(id);
+                el.classList.toggle('active');
+            },
+
+            renderRDOs() {
+                const tbody = document.querySelector('#tableRDO tbody');
+                tbody.innerHTML = '';
+
+                const statusFilter = document.getElementById('filterStatus')?.value || '';
+                const colaboradorFilter = document.getElementById('filterColaborador')?.value || '';
+
+                let filtered = this.rdos;
+                if (statusFilter) filtered = filtered.filter(r => r.status === statusFilter);
+                if (colaboradorFilter) filtered = filtered.filter(r => r.colaborador === colaboradorFilter);
+
+                filtered.forEach((rdo, idx) => {
+                    const row = document.createElement('tr');
+                    row.className = 'expandable-row';
+                    row.innerHTML = `
+                        <td>${rdo.id}</td>
+                        <td>${rdo.dataAbertura}</td>
+                        <td>${rdo.equipamento}</td>
+                        <td>${rdo.servico}</td>
+                        <td>${rdo.colaborador}</td>
+                        <td><span class="badge ${this.getStatusBadgeClass(rdo.status)}">${rdo.status}</span></td>
+                        <td>${rdo.horas}h</td>
+                        <td>R$ ${rdo.custo.toFixed(2)}</td>
+                        <td>
+                            <button class="btn-secondary" onclick="app.expandRDO('${rdo.id}')">Expandir</button>
+                            <button class="btn-secondary" onclick="app.editRDO('${rdo.id}')">Editar</button>
+                            <button class="btn-danger" onclick="app.deleteRDO('${rdo.id}')">Deletar</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            },
+
+            renderEquipamentos() {
+                const tbody = document.querySelector('#tableEquipamentos tbody');
+                tbody.innerHTML = '';
+
+                const localFilter = document.getElementById('filterLocal')?.value || '';
+                const tipoFilter = document.getElementById('filterTipo')?.value || '';
+
+                let filtered = this.equipamentos;
+                if (localFilter) filtered = filtered.filter(e => e.local === localFilter);
+                if (tipoFilter) filtered = filtered.filter(e => e.tipo === tipoFilter);
+
+                filtered.forEach(equip => {
+                    const row = document.createElement('tr');
+                    row.className = 'expandable-row';
+                    row.innerHTML = `
+                        <td><strong>${equip.tag}</strong></td>
+                        <td>${equip.tipo}</td>
+                        <td>${equip.fabricante}</td>
+                        <td>${equip.local}</td>
+                        <td>${equip.kw} kW</td>
+                        <td><span class="badge badge-success">Em Dia</span></td>
+                        <td>
+                            <button class="btn-secondary" onclick="app.expandEquip('${equip.tag}')">Expandir</button>
+                            <button class="btn-secondary" onclick="app.editEquip('${equip.tag}')">Editar</button>
+                            <button class="btn-danger" onclick="app.deleteEquip('${equip.tag}')">Deletar</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            },
+
+            renderServicos() {
+                const grid = document.getElementById('servicesGrid');
+                grid.innerHTML = '';
+
+                this.servicos.forEach(serv => {
+                    const card = document.createElement('div');
+                    card.style.cssText = 'background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer;';
+                    card.innerHTML = `
+                        <h3 style="color: #003366; margin-bottom: 10px;">${serv.nome}</h3>
+                        <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">${serv.desc}</p>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9em; margin-bottom: 15px;">
+                            <div><strong>Categoria:</strong> ${serv.categoria}</div>
+                            <div><strong>Periodicidade:</strong> ${serv.periodicidade}</div>
+                            <div><strong>Custo:</strong> R$ ${serv.custo}</div>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn-secondary" onclick="app.expandServico('${serv.id}')">Expandir</button>
+                            <button class="btn-secondary" onclick="app.editServico('${serv.id}')">Editar</button>
+                            <button class="btn-danger" onclick="app.deleteServico('${serv.id}')">Deletar</button>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            },
+
+            renderColaboradores() {
+                const tbody = document.querySelector('#tableColaboradores tbody');
+                tbody.innerHTML = '';
+
+                this.colaboradores.forEach(colab => {
+                    const rdosCount = this.rdos.filter(r => r.colaborador === colab.id).length;
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${colab.id}</td>
+                        <td><strong>${colab.nome}</strong></td>
+                        <td>${colab.cargo}</td>
+                        <td>${colab.email}</td>
+                        <td>${colab.telefone}</td>
+                        <td>${rdosCount}</td>
+                        <td><span class="badge badge-success">${colab.status}</span></td>
+                        <td>
+                            <button class="btn-secondary" onclick="app.editColab('${colab.id}')">Editar</button>
+                            <button class="btn-danger" onclick="app.deleteColab('${colab.id}')">Deletar</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            },
+
+            // MÉTODOS DE EXPANSÃO E EDIÇÃO
+            expandRDO(id) {
+                const rdo = this.rdos.find(r => r.id === id);
+                if (!rdo) return;
+
+                const modal = document.getElementById('modalRDO');
+                const body = document.getElementById('modalRDOBody');
+                body.innerHTML = `
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">ID RDO</div>
+                            <div class="detail-value">${rdo.id}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Cliente</div>
+                            <div class="detail-value">${rdo.cliente}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Unidade</div>
+                            <div class="detail-value">${rdo.unidade}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Equipamento</div>
+                            <div class="detail-value">${rdo.equipamento}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Serviço</div>
+                            <div class="detail-value">${rdo.servico}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Colaborador</div>
+                            <div class="detail-value">${rdo.colaborador}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Status</div>
+                            <div class="detail-value">${rdo.status}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Horas</div>
+                            <div class="detail-value">${rdo.horas}h</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Custo</div>
+                            <div class="detail-value">R$ ${rdo.custo.toFixed(2)}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Observações</div>
+                            <div class="detail-value">${rdo.observacoes || 'N/A'}</div>
+                        </div>
+                    </div>
+                `;
+                modal.classList.add('active');
+            },
+
+            editRDO(id) {
+                const rdo = this.rdos.find(r => r.id === id);
+                if (!rdo) return;
+                alert('Editar RDO: ' + id);
+            },
+
+            deleteRDO(id) {
+                this.showConfirm('Tem certeza que deseja deletar esta RDO?', () => {
+                    this.rdos = this.rdos.filter(r => r.id !== id);
+                    this.renderRDOs();
+                    this.updateDashboard();
+                    this.showToast('RDO deletada com sucesso', 'success');
+                });
+            },
+
+            expandEquip(tag) {
+                const equip = this.equipamentos.find(e => e.tag === tag);
+                if (!equip) return;
+
+                const modal = document.getElementById('modalEquip');
+                const body = document.getElementById('modalEquipBody');
+                body.innerHTML = `
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">TAG</div>
+                            <div class="detail-value">${equip.tag}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Tipo</div>
+                            <div class="detail-value">${equip.tipo}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Fabricante</div>
+                            <div class="detail-value">${equip.fabricante}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Modelo</div>
+                            <div class="detail-value">${equip.modelo}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Compressor</div>
+                            <div class="detail-value">${equip.compressor}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Condensador</div>
+                            <div class="detail-value">${equip.condensador}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Refrigerante</div>
+                            <div class="detail-value">${equip.refrigerante}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">TR</div>
+                            <div class="detail-value">${equip.tr || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">kW</div>
+                            <div class="detail-value">${equip.kw}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">BTU/h</div>
+                            <div class="detail-value">${equip.btu || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Tipo de Atividade</div>
+                            <div class="detail-value">${equip.tipoAtiv}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Local</div>
+                            <div class="detail-value">${equip.local}</div>
+                        </div>
+                    </div>
+                `;
+                modal.classList.add('active');
+            },
+
+            editEquip(tag) {
+                alert('Editar Equipamento: ' + tag);
+            },
+
+            deleteEquip(tag) {
+                this.showConfirm('Tem certeza que deseja deletar este equipamento? Todas as RDOs vinculadas também serão removidas.', () => {
+                    this.equipamentos = this.equipamentos.filter(e => e.tag !== tag);
+                    this.rdos = this.rdos.filter(r => r.equipamento !== tag);
+                    this.renderEquipamentos();
+                    this.renderRDOs();
+                    this.updateDashboard();
+                    this.showToast('Equipamento deletado com sucesso', 'success');
+                });
+            },
+
+            expandServico(id) {
+                const serv = this.servicos.find(s => s.id === id);
+                if (!serv) return;
+
+                const modal = document.getElementById('modalServico');
+                const body = document.getElementById('modalServicoBody');
+                body.innerHTML = `
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">ID</div>
+                            <div class="detail-value">${serv.id}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Nome</div>
+                            <div class="detail-value">${serv.nome}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Categoria</div>
+                            <div class="detail-value">${serv.categoria}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Periodicidade</div>
+                            <div class="detail-value">${serv.periodicidade}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Custo</div>
+                            <div class="detail-value">R$ ${serv.custo}</div>
+                        </div>
+                        <div class="detail-item" style="grid-column: 1 / -1;">
+                            <div class="detail-label">Descrição</div>
+                            <div class="detail-value">${serv.desc}</div>
+                        </div>
+                    </div>
+                `;
+                modal.classList.add('active');
+            },
+
+            editServico(id) {
+                alert('Editar Serviço: ' + id);
+            },
+
+            deleteServico(id) {
+                this.showConfirm('Tem certeza que deseja deletar este serviço?', () => {
+                    this.servicos = this.servicos.filter(s => s.id !== id);
+                    this.renderServicos();
+                    this.showToast('Serviço deletado com sucesso', 'success');
+                });
+            },
+
+            editColab(id) {
+                alert('Editar Colaborador: ' + id);
+            },
+
+            deleteColab(id) {
+                this.showConfirm('Tem certeza que deseja deletar este colaborador?', () => {
+                    this.colaboradores = this.colaboradores.filter(c => c.id !== id);
+                    this.renderColaboradores();
+                    this.showToast('Colaborador deletado com sucesso', 'success');
+                });
+            },
+
+            // HANDLERS
+            handleRDOSubmit(e) {
+                e.preventDefault();
+                const form = e.target;
+                const dados = new FormData(form);
+
+                const novaRDO = {
+                    id: 'RDO' + (this.rdos.length + 1).toString().padStart(7, '0'),
+                    dataAbertura: new Date().toISOString().split('T')[0],
+                    dataExecucao: dados.get('dataExecucao') || '',
+                    cliente: dados.get('cliente'),
+                    unidade: dados.get('unidade'),
+                    equipamento: dados.get('equipamento'),
+                    tipoAtividade: dados.get('tipoAtividade'),
+                    servico: dados.get('servico'),
+                    colaborador: dados.get('colaborador'),
+                    status: dados.get('status'),
+                    horas: parseFloat(dados.get('horas')),
+                    custo: parseFloat(dados.get('custo')),
+                    observacoes: dados.get('observacoes')
+                };
+
+                this.rdos.push(novaRDO);
+                this.renderRDOs();
+                this.updateDashboard();
+                form.reset();
+                this.showToast('RDO criada com sucesso!', 'success');
+            },
+
+            handleColabSubmit(e) {
+                e.preventDefault();
+                const form = e.target;
+                const dados = new FormData(form);
+
+                const novoColab = {
+                    id: 'COL' + (this.colaboradores.length + 1).toString().padStart(3, '0'),
+                    nome: dados.get('nome'),
+                    cargo: dados.get('cargo'),
+                    email: dados.get('email'),
+                    telefone: dados.get('telefone'),
+                    especialidade: dados.get('especialidade'),
+                    status: dados.get('status')
+                };
+
+                this.colaboradores.push(novoColab);
+                this.renderColaboradores();
+                form.reset();
+                this.showToast('Colaborador adicionado com sucesso!', 'success');
+            },
+
+            // UTILITÁRIOS
+            updateDashboard() {
+                document.getElementById('kpi-equipamentos').textContent = this.equipamentos.length;
+                document.getElementById('kpi-rdos').textContent = this.rdos.length;
+                document.getElementById('kpi-horas').textContent = this.rdos.reduce((sum, r) => sum + r.horas, 0).toFixed(1) + 'h';
+                document.getElementById('kpi-custo').textContent = 'R$ ' + this.rdos.reduce((sum, r) => sum + r.custo, 0).toFixed(2);
+
+                document.getElementById('stat-equip').textContent = this.equipamentos.length;
+                document.getElementById('stat-colab').textContent = this.colaboradores.length;
+                document.getElementById('stat-serv').textContent = this.servicos.length;
+                document.getElementById('stat-rdos').textContent = this.rdos.length;
+
+                this.drawCharts();
+            },
+
+            drawCharts() {
+                // Chart 1: Status de Equipamentos
+                const ctx1 = document.getElementById('chartStatus');
+                if (ctx1) {
+                    const data1 = [28, 5, 2];
+                    const colors1 = ['#00AA44', '#FF9900', '#CC0000'];
+                    const labels1 = ['Em Dia', 'Atenção', 'Crítico'];
+
+                    ctx1.width = ctx1.offsetWidth;
+                    ctx1.height = 300;
+                    const c1 = ctx1.getContext('2d');
+                    this.drawDonut(c1, data1, colors1, labels1, 'Status');
+                }
+
+                // Chart 2: RDOs por Status
+                const ctx2 = document.getElementById('chartRDO');
+                if (ctx2) {
+                    const data2 = [
+                        this.rdos.filter(r => r.status === 'Concluído').length,
+                        this.rdos.filter(r => r.status === 'Em Execução').length,
+                        this.rdos.filter(r => r.status === 'Programado').length
+                    ];
+                    const colors2 = ['#00AA44', '#3399FF', '#FF9900'];
+                    const labels2 = ['Concluído', 'Em Execução', 'Programado'];
+
+                    ctx2.width = ctx2.offsetWidth;
+                    ctx2.height = 300;
+                    const c2 = ctx2.getContext('2d');
+                    this.drawBar(c2, data2, colors2, labels2);
+                }
+            },
+
+            drawDonut(ctx, data, colors, labels) {
+                const total = data.reduce((a, b) => a + b, 0);
+                const centerX = ctx.canvas.width / 2;
+                const centerY = ctx.canvas.height / 2;
+                const radius = 80;
+                const innerRadius = 50;
+
+                let currentAngle = -Math.PI / 2;
+
+                data.forEach((value, i) => {
+                    const sliceAngle = (value / total) * 2 * Math.PI;
+
+                    // Desenhar fatia
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+                    ctx.lineTo(centerX + Math.cos(currentAngle + sliceAngle / 2) * innerRadius, centerY + Math.sin(currentAngle + sliceAngle / 2) * innerRadius);
+                    ctx.arc(centerX, centerY, innerRadius, currentAngle + sliceAngle, currentAngle, true);
+                    ctx.closePath();
+                    ctx.fillStyle = colors[i];
+                    ctx.fill();
+
+                    // Texto
+                    const textAngle = currentAngle + sliceAngle / 2;
+                    const textX = centerX + Math.cos(textAngle) * (radius + innerRadius) / 2;
+                    const textY = centerY + Math.sin(textAngle) * (radius + innerRadius) / 2;
+                    ctx.fillStyle = '#FFF';
+                    ctx.font = 'bold 16px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(value, textX, textY);
+
+                    currentAngle += sliceAngle;
+                });
+
+                // Legenda
+                let y = 20;
+                ctx.font = '14px Arial';
+                labels.forEach((label, i) => {
+                    ctx.fillStyle = colors[i];
+                    ctx.fillRect(10, y, 15, 15);
+                    ctx.fillStyle = '#333';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(label + ': ' + data[i], 30, y + 12);
+                    y += 25;
+                });
+            },
+
+            drawBar(ctx, data, colors, labels) {
+                const padding = 50;
+                const chartWidth = ctx.canvas.width - padding * 2;
+                const chartHeight = ctx.canvas.height - padding * 2;
+                const barWidth = chartWidth / (data.length * 1.5);
+
+                const max = Math.max(...data, 1);
+
+                data.forEach((value, i) => {
+                    const x = padding + i * (barWidth * 1.5) + barWidth * 0.25;
+                    const height = (value / max) * chartHeight;
+                    const y = ctx.canvas.height - padding - height;
+
+                    ctx.fillStyle = colors[i];
+                    ctx.fillRect(x, y, barWidth, height);
+
+                    ctx.fillStyle = '#FFF';
+                    ctx.font = 'bold 16px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(value, x + barWidth / 2, y + height / 2);
+
+                    ctx.fillStyle = '#333';
+                    ctx.font = '12px Arial';
+                    ctx.fillText(labels[i], x + barWidth / 2, ctx.canvas.height - padding + 20);
+                });
+            },
+
+            exportCSV() {
+                let csv = 'ID,Data Abertura,Equipamento,Serviço,Colaborador,Status,Horas,Custo\n';
+                this.rdos.forEach(rdo => {
+                    csv += `${rdo.id},${rdo.dataAbertura},${rdo.equipamento},${rdo.servico},${rdo.colaborador},${rdo.status},${rdo.horas},${rdo.custo}\n`;
+                });
+
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'RDOs_FPSO_Bacalhau.csv';
+                a.click();
+                this.showToast('CSV exportado com sucesso!', 'success');
+            },
+
+            getStatusBadgeClass(status) {
+                switch(status) {
+                    case 'Concluído': return 'badge-success';
+                    case 'Em Execução': return 'badge-info';
+                    case 'Programado': return 'badge-warning';
+                    default: return 'badge-info';
+                }
+            },
+
+            showConfirm(message, callback) {
+                document.getElementById('confirmMessage').textContent = message;
+                document.getElementById('modalConfirm').classList.add('active');
+
+                document.getElementById('confirmYes').onclick = () => {
+                    callback();
+                    document.getElementById('modalConfirm').classList.remove('active');
+                };
+                document.getElementById('confirmNo').onclick = () => {
+                    document.getElementById('modalConfirm').classList.remove('active');
+                };
+            },
+
+            showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+        };
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => app.init());
+    </script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 # Supply Marine HVAC Management System
 ## FPSO Bacalhau - Modec
 
-Sistema web completo para gestão de equipamentos HVAC, RDOs, colaboradores e serviços da FPSO Bacalhau.
+Sistema web completo para gestão de equipamentos HVAC, RDOs, colaboradores e serviços.
 
 ---
 
@@ -15,60 +15,6 @@ Sistema web completo para gestão de equipamentos HVAC, RDOs, colaboradores e se
 ✅ **Design Responsivo** - Funciona em desktop, tablet e mobile  
 ✅ **Paleta Supply Marine** - Cores oficiais da empresa  
 ✅ **Zero Dependências** - HTML5 + CSS3 + Vanilla JavaScript  
-
----
-
-## 🚀 Deploy no GitHub
-
-### 1. Preparar o Repositório
-
-```bash
-# Criar pasta do projeto
-mkdir supply-marine-hvac
-cd supply-marine-hvac
-
-# Inicializar repositório Git
-git init
-
-# Criar arquivo .gitignore
-echo "node_modules/" > .gitignore
-echo ".DS_Store" >> .gitignore
-```
-
-### 2. Adicionar Arquivos
-
-Coloque os seguintes arquivos na pasta raiz:
-
-- `index.html` - Aplicativo web completo (fornecido)
-- `README.md` - Este arquivo
-- `.gitignore` - Arquivo de exclusão
-
-### 3. Commit e Push
-
-```bash
-# Adicionar todos os arquivos
-git add .
-
-# Fazer commit inicial
-git commit -m "Initial commit: Supply Marine HVAC System v1.0"
-
-# Adicionar remote do GitHub
-git remote add origin https://github.com/seu-usuario/supply-marine-hvac.git
-
-# Fazer push para main
-git branch -M main
-git push -u origin main
-```
-
-### 4. Habilitar GitHub Pages
-
-1. Vá para **Settings** do repositório
-2. Navegue até **Pages** (no menu lateral)
-3. Em **Source**, selecione: **main** (branch)
-4. Escolha a pasta: **/ (root)**
-5. Clique em **Save**
-
-A aplicação estará disponível em: `https://seu-usuario.github.io/supply-marine-hvac/`
 
 ---
 
@@ -116,14 +62,14 @@ Acesse: `http://localhost:8000`
 - Tipos de atividades e locais
 
 ### Colaboradores
-- **6 colaboradores** pré-cadastrados
+- **6 colaboradores (fictícios)** pré-cadastrados
 - Contatos, cargos, especialidades
 - Rastreamento de RDOs
 
 ### Serviços
 - **8 tipos de serviços** disponíveis
-- Descrições, categor ias, periodicidades
-- Custos estimados
+- Descrições, categorias, periodicidades
+- Custos estimados (fictícios)
 
 ### RDOs
 - Funcionalidade completa de CRUD
@@ -266,15 +212,13 @@ app.servicos.push({
 
 ## 📄 Licença
 
-Este projeto é propriedade da Supply Marine e Modec.
+Este projeto é propriedade da Supply Marine, sobre o desenvolvimento e cuidados de Andrey.
 
 ---
 
 ## 👥 Colaboradores
 
 - Supply Marine
-- Modec Serviços de Petróleo do Brasil
-- FPSO Bacalhau
 
 ---
 
@@ -282,7 +226,7 @@ Este projeto é propriedade da Supply Marine e Modec.
 
 ### v1.0 (30/10/2025)
 - ✅ Lançamento inicial
-- ✅ 35 equipamentos reais
+- ✅ 35 equipamentos (Ficticios)
 - ✅ CRUD completo para todos os módulos
 - ✅ Dashboard com gráficos e números
 - ✅ Exportação CSV

@@ -1,5 +1,5 @@
 # Supply Marine HVAC Management System
-## FPSO Bacalhau - Modec
+## Gestão de Equipamentos e Manutenções
 
 Sistema web completo para gestão de equipamentos HVAC, RDOs, colaboradores e serviços.
 
@@ -205,8 +205,7 @@ app.servicos.push({
 
 **Supply Marine - HVAC Solutions**
 - Website: www.supplymarine.com.br
-- Email: contato@supplymarine.com.br
-- Telefone: +55 21 XXXX-XXXX
+- Email: achiesa@supplymarine.com.br
 
 ---
 
@@ -236,7 +235,6 @@ Este projeto é propriedade da Supply Marine, sobre o desenvolvimento e cuidados
 
 **Desenvolvido com ❤️ para Supply Marine**
 
-*Sistema de Gestão HVAC - FPSO Bacalhau*
+*Sistema de Gestão HVAC - Supply Marine*
 =======
 # supplymarinecrm
->>>>>>> aa637ee23e4c13de51752ab2abd15f4bb152d3d3
